@@ -17,14 +17,14 @@ See `SKILL.md` for the Claude-facing invocation flow and `docs/design.md` for th
    git clone https://github.com/chun-mura/claude-code-bp-review ~/.claude/skills/bp-review
    ```
 
-2. Register the reactive nudge hook in `~/.claude/settings.json` under `.hooks.ConfigChange[]`:
+2. Register the nudge hook in `~/.claude/settings.json` under `.hooks.SessionStart[]`:
 
    ```json
    {
      "hooks": {
-       "ConfigChange": [
+       "SessionStart": [
          {
-           "matcher": "user_settings",
+           "matcher": "",
            "hooks": [
              { "type": "command", "command": "bash ~/.claude/skills/bp-review/scripts/nudge.sh" }
            ]
@@ -46,7 +46,7 @@ See `SKILL.md` for the Claude-facing invocation flow and `docs/design.md` for th
 
 Suggested review rhythm:
 
-1. **Reactive nudge** — the `ConfigChange` hook fires whenever `~/.claude/settings.json` changes. `scripts/nudge.sh` prints a one-line reminder if the last run is older than `BP_REVIEW_NUDGE_DAYS` (default: 7).
+1. **Session-start nudge** — the `SessionStart` hook fires on every new Claude Code session. `scripts/nudge.sh` prints a one-line reminder if the last run is older than `BP_REVIEW_NUDGE_DAYS` (default: 7). No reminder is printed on fresh installs — the timestamp file is only written after the first `/bp-review` run.
 2. **After each run of `/health`** — run `/bp-review` to cover the external frontier that `/health` cannot see.
 3. **Ad hoc** — also run when:
    - A new Claude Code release lands (watch the release-notes source health for `STALE_FETCH` as an early signal of upstream changes).

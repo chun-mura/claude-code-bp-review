@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# nudge.sh — ConfigChange hook for bp-review.
+# nudge.sh — SessionStart nudge hook for bp-review.
 #
 # Prints a single reminder line if the last bp-review run is older than
 # NUDGE_DAYS days. Does nothing on first run (no timestamp file yet) to

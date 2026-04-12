@@ -1,6 +1,6 @@
 ---
 name: bp-review
-description: Review the user's global ~/.claude/ configuration against the latest official Claude Code best-practice docs and user-curated sources. Produces a dated report and draft patches in ~/.claude/bp-review/ without modifying any original files. Complements claude-health (internal audit) by tracking the moving frontier (new features, deprecated settings, changed recommendations). Use when the user asks to "review Claude Code config freshness", "check global Claude config against best practices", or types /bp-review, or when the ConfigChange nudge fires after ~/.claude/settings.json changes.
+description: Review the user's global ~/.claude/ configuration against the latest official Claude Code best-practice docs and user-curated sources. Produces a dated report and draft patches in ~/.claude/bp-review/ without modifying any original files. Complements claude-health (internal audit) by tracking the moving frontier (new features, deprecated settings, changed recommendations). Use when the user asks to "review Claude Code config freshness", "check global Claude config against best practices", or types /bp-review, or when the SessionStart nudge fires at the start of a new Claude Code session.
 ---
 
 # bp-review
@@ -141,7 +141,7 @@ Run:
 date -u +%Y-%m-%dT%H:%M:%SZ > ~/.claude/bp-review/last_check.txt
 ```
 
-The ConfigChange nudge hook reads this file.
+The SessionStart nudge hook reads this file.
 
 ### Step 7 — Summarize to the user
 
