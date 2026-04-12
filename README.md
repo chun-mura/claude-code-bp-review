@@ -6,7 +6,7 @@ See `SKILL.md` for the Claude-facing invocation flow and `docs/design.md` for th
 
 ## Relationship to other tooling
 
-- `claude-health` (`/health`) — internal six-layer audit. Run first.
+- [`claude-health`](https://github.com/tw93/claude-health) (`/health`) — internal six-layer audit by tw93. Run first.
 - `bp-review` (`/bp-review`) — external best-practice drift check. Run second.
 
 ## Install
