@@ -1,0 +1,45 @@
+# bp-review source definitions.
+#
+# The `official` block ships with the skill. Do not remove entries; only
+# update URLs when upstream docs relocate.
+#
+# The `user` block is user-editable. URLs here are treated as less-trusted:
+# their fetch results may inform informational diff but will never be used
+# to auto-generate patches.
+#
+# Each entry supports:
+#   url         - absolute https URL
+#   label       - short human label
+#   expect      - list of substring landmarks that must appear in the fetched
+#                 content. If fewer than half are present, the source is
+#                 marked STALE_FETCH and excluded from diff analysis.
+#   min_length  - minimum character count of the fetched content. Below this
+#                 threshold, the source is marked STALE_FETCH.
+
+official:
+  - url: https://code.claude.com/docs/en/overview
+    label: Claude Code Docs (overview)
+    expect: ["Claude Code", "CLAUDE.md"]
+    min_length: 500
+  - url: https://code.claude.com/docs/en/settings
+    label: settings.json reference
+    expect: ["settings.json", "permissions", "hooks"]
+    min_length: 800
+  - url: https://code.claude.com/docs/en/hooks
+    label: Hooks reference
+    expect: ["PreToolUse", "SessionStart", "matcher"]
+    min_length: 800
+  - url: https://code.claude.com/docs/en/skills
+    label: Skills reference
+    expect: ["SKILL.md", "frontmatter", "description"]
+    min_length: 500
+  - url: https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md
+    label: Claude Code CHANGELOG (GitHub)
+    expect: ["version", "release"]
+    min_length: 300
+
+user:
+  - url: https://tw93.fun/en/2026-03-12/claude.html
+    label: tw93 six-layer framework
+    expect: ["six-layer", "CLAUDE.md"]
+    min_length: 500

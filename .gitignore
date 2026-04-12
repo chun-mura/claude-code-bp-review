@@ -1,0 +1,4 @@
+# No runtime artifacts — those live in ~/.claude/bp-review/
+/tmp/
+*.bak
+*.bak-*

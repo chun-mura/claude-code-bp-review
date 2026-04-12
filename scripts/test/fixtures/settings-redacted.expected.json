@@ -1,0 +1,38 @@
+{
+  "model": "claude-opus-4-6",
+  "hooks": {
+    "SessionStart": [
+      {
+        "command": "bash ~/.claude/hooks/bark-notify.sh"
+      }
+    ]
+  },
+  "env": {
+    "BARK_DEVICE_KEY": "[REDACTED]",
+    "BARK_ENCRYPT_KEY": "[REDACTED]",
+    "BARK_ENCRYPT_IV": "[REDACTED]",
+    "CLAUDE_CODE_NO_FLICKER": "1",
+    "ENABLE_TOOL_SEARCH": "true",
+    "MAX_THINKING_TOKENS": "[REDACTED]"
+  },
+  "mcpServers": {
+    "example": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "example-mcp"
+      ],
+      "env": {
+        "EXAMPLE_API_KEY": "[REDACTED]",
+        "OPENAI_API_KEY": "[REDACTED]",
+        "DATABASE_URL": "[REDACTED]"
+      }
+    }
+  },
+  "apiKey": "[REDACTED]",
+  "token": "[REDACTED]",
+  "secret": "[REDACTED]",
+  "password": "[REDACTED]",
+  "bearerToken": "[REDACTED]",
+  "privateKey": "[REDACTED]"
+}
