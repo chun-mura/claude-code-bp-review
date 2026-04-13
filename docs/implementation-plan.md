@@ -16,7 +16,7 @@
 **Spec reference:** `~/.claude/plans/2026-04-12-bp-review-design.md`
 
 **Important handling:**
-- `~/.claude/settings.json` may contain secrets. Any task that reads it MUST pipe through `scripts/redact.sh` first. Task 10 (hook registration) requires **explicit user permission** before running, per `feedback_no_read_secrets.md`.
+- `~/.claude/settings.json` may contain secrets. Any task that reads it MUST pipe through `scripts/redact.sh` first. Task 10 (hook registration) requires **explicit user permission** before running — never modify `settings.json` without confirmation.
 
 ---
 

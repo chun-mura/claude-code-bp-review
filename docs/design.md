@@ -1,7 +1,7 @@
 # bp-review Skill — Design Spec
 
 - **Date**: 2026-04-12
-- **Author**:  (via brainstorming with Claude)
+- **Author**: chun-mura (via brainstorming with Claude)
 - **Status**: Draft — awaiting user review before implementation plan
 
 ## 1. Purpose & Scope
