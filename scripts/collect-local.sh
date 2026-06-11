@@ -16,7 +16,9 @@ section() { printf '\n===== %s =====\n' "$1"; }
 
 section "CLAUDE.md"
 if [ -f "$CLAUDE_HOME/CLAUDE.md" ]; then
-  if grep -E -i '(api[_-]?key|token|secret|password)[[:space:]]*[:=][[:space:]]*[^[:space:]]' "$CLAUDE_HOME/CLAUDE.md" >/dev/null; then
+  # 値が $var / $(cmd) / (…) / <placeholder> で始まる行は shell 置換・テンプレ例であり実 secret ではない
+  # (例: GH_TOKEN=$(gh auth token --user <expected>) — identity HOW のコマンド例で FP 多発のため除外。 2026-06-11 user 承認の local patch)
+  if grep -E -i '(api[_-]?key|token|secret|password)[[:space:]]*[:=][[:space:]]*[^[:space:]$(<]' "$CLAUDE_HOME/CLAUDE.md" >/dev/null; then
     echo "(blocked: CLAUDE.md appears to contain secret-shaped content — aborting to avoid leakage)"
     exit 3
   fi
