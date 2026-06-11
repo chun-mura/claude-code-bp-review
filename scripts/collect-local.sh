@@ -16,8 +16,10 @@ section() { printf '\n===== %s =====\n' "$1"; }
 
 section "CLAUDE.md"
 if [ -f "$CLAUDE_HOME/CLAUDE.md" ]; then
-  # 値が $var / $(cmd) / (…) / <placeholder> で始まる行は shell 置換・テンプレ例であり実 secret ではない
-  # (例: GH_TOKEN=$(gh auth token --user <expected>) — identity HOW のコマンド例で FP 多発のため除外。 2026-06-11 user 承認の local patch)
+  # Lines whose values start with $var, $(cmd), (...), or <placeholder> are shell substitutions
+  # or template examples, not literal secrets.
+  # Example: GH_TOKEN=$(gh auth token --user <expected>) — such command documentation was causing
+  # frequent false positives. Exclusion pattern updated 2026-06-11.
   if grep -E -i '(api[_-]?key|token|secret|password)[[:space:]]*[:=][[:space:]]*[^[:space:]$(<]' "$CLAUDE_HOME/CLAUDE.md" >/dev/null; then
     echo "(blocked: CLAUDE.md appears to contain secret-shaped content — aborting to avoid leakage)"
     exit 3
