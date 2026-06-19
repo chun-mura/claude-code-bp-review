@@ -33,7 +33,7 @@ official:
     label: Skills reference
     expect: ["SKILL.md", "frontmatter", "description"]
     min_length: 500
-  - url: https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md
+  - url: https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md
     label: Claude Code CHANGELOG (GitHub)
     expect: ["version", "release"]
     min_length: 300

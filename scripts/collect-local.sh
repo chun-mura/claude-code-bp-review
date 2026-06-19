@@ -16,7 +16,11 @@ section() { printf '\n===== %s =====\n' "$1"; }
 
 section "CLAUDE.md"
 if [ -f "$CLAUDE_HOME/CLAUDE.md" ]; then
-  if grep -E -i '(api[_-]?key|token|secret|password)[[:space:]]*[:=][[:space:]]*[^[:space:]]' "$CLAUDE_HOME/CLAUDE.md" >/dev/null; then
+  # Lines whose values start with $var, $(cmd), (...), or <placeholder> are shell substitutions
+  # or template examples, not literal secrets.
+  # Example: GH_TOKEN=$(gh auth token --user <expected>) — such command documentation was causing
+  # frequent false positives. Exclusion pattern updated 2026-06-11.
+  if grep -E -i '(api[_-]?key|token|secret|password)[[:space:]]*[:=][[:space:]]*[^[:space:]$(<]' "$CLAUDE_HOME/CLAUDE.md" >/dev/null; then
     echo "(blocked: CLAUDE.md appears to contain secret-shaped content — aborting to avoid leakage)"
     exit 3
   fi
