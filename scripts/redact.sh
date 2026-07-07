@@ -27,8 +27,8 @@ set -euo pipefail
 #   credential     — credential, credentials
 #   bearer         — bearer (Authorization: Bearer ...)
 #   database_?url  — DATABASE_URL, databaseUrl
-#   (^|_)iv(_|$)   — IV as word-ish boundary (BARK_ENCRYPT_IV, initIv, IV)
-#                    without matching "privative" / "derivative".
+#   (^|_)iv(_|$)   — IV as word-ish boundary (IV, iv, enc_iv,
+#                    BARK_ENCRYPT_IV) without matching "privative" / "derivative".
 SECRET_KEY_PATTERN='key|secret|password|token|credential|bearer|database_?url|(^|_)iv(_|$)'
 
 redact_json() {
@@ -41,7 +41,7 @@ redact_json() {
     def redact_walk:
       if type == "object" then
         with_entries(
-          if (.key | test($pat; "i")) and (.value | type == "string")
+          if (.key | test($pat; "i"))
           then .value = "[REDACTED]"
           else .value |= redact_walk
           end
@@ -58,8 +58,11 @@ redact_json() {
 redact_text() {
   local file="$1"
   # Fallback: regex match on `"key": "value"` where key contains any of
-  # the sensitive substrings. Less robust than json mode.
-  sed -E 's/("([^"]*([kK][eE][yY]|[sS][eE][cC][rR][eE][tT]|[pP][aA][sS][sS][wW][oO][rR][dD]|[tT][oO][kK][eE][nN]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[bB][eE][aA][rR][eE][rR]|[dD][aA][tT][aA][bB][aA][sS][eE]_?[uU][rR][lL])[^"]*)"[[:space:]]*:[[:space:]]*")[^"]*/\1[REDACTED]/g' "$file"
+  # the sensitive substrings, or (for the iv pattern) matches a
+  # start/underscore/end word boundary around "iv" (e.g. IV, enc_iv,
+  # BARK_ENCRYPT_IV) without matching "derivative". Less robust than json
+  # mode.
+  sed -E 's/("([^"]*([kK][eE][yY]|[sS][eE][cC][rR][eE][tT]|[pP][aA][sS][sS][wW][oO][rR][dD]|[tT][oO][kK][eE][nN]|[cC][rR][eE][dD][eE][nN][tT][iI][aA][lL]|[bB][eE][aA][rR][eE][rR]|[dD][aA][tT][aA][bB][aA][sS][eE]_?[uU][rR][lL])[^"]*|[iI][vV]|[iI][vV]_[^"]*|[^"]*_[iI][vV]|[^"]*_[iI][vV]_[^"]*)"[[:space:]]*:[[:space:]]*")[^"]*/\1[REDACTED]/g' "$file"
 }
 
 usage() {

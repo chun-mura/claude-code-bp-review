@@ -44,7 +44,11 @@ assert_not_contains() {
 }
 
 tmp=$(mktemp)
-trap 'rm -f "$tmp"' EXIT
+json_nested=$(mktemp)
+json_nested_out=$(mktemp)
+text_in=$(mktemp)
+text_out=$(mktemp)
+trap 'rm -f "$tmp" "$json_nested" "$json_nested_out" "$text_in" "$text_out"' EXIT
 
 # Test 1: JSON redaction produces expected output
 "$REDACT" json "$FIXTURES/settings-with-secrets.json" > "$tmp"
@@ -68,6 +72,41 @@ assert_contains "model preserved" "$tmp" "claude-opus-4-6"
 assert_contains "hook command preserved" "$tmp" "bark-notify.sh"
 assert_contains "CLAUDE_CODE_NO_FLICKER preserved" "$tmp" "CLAUDE_CODE_NO_FLICKER"
 assert_contains "ENABLE_TOOL_SEARCH preserved" "$tmp" "ENABLE_TOOL_SEARCH"
+
+# Test 5: JSON subtree redaction — object/array values under secret-named
+# keys must be fully redacted, not just string values.
+cat > "$json_nested" <<'EOF'
+{
+  "credentials": {
+    "pass": "FAKE_NESTED_SECRET"
+  },
+  "tokens": [
+    "FAKE_ARRAY_TOKEN"
+  ],
+  "apiKeys": {
+    "prod": "FAKE_PROD_KEY"
+  }
+}
+EOF
+"$REDACT" json "$json_nested" > "$json_nested_out"
+assert_not_contains "nested object under credentials leaked" "$json_nested_out" "FAKE_NESTED_SECRET"
+assert_not_contains "string array under tokens leaked" "$json_nested_out" "FAKE_ARRAY_TOKEN"
+assert_not_contains "object under apiKeys leaked" "$json_nested_out" "FAKE_PROD_KEY"
+assert_contains "marker present for nested subtree redaction" "$json_nested_out" "\[REDACTED\]"
+
+# Test 6: text mode — "key": "value" pairs are redacted, including the iv pattern.
+cat > "$text_in" <<'EOF'
+some notes
+"apiKey": "FAKE_TEXT_KEY"
+"enc_iv": "FAKE_TEXT_IV"
+"password": "FAKE_TEXT_PW"
+"derivative": "NOT_A_SECRET"
+EOF
+"$REDACT" text "$text_in" > "$text_out"
+assert_not_contains "text mode apiKey leaked" "$text_out" "FAKE_TEXT_KEY"
+assert_not_contains "text mode enc_iv leaked" "$text_out" "FAKE_TEXT_IV"
+assert_not_contains "text mode password leaked" "$text_out" "FAKE_TEXT_PW"
+assert_contains "text mode derivative not redacted" "$text_out" "NOT_A_SECRET"
 
 echo
 echo "Result: $pass passed, $fail failed"
