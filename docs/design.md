@@ -2,7 +2,7 @@
 
 - **Date**: 2026-04-12
 - **Author**: chun-mura (via brainstorming with Claude)
-- **Status**: Draft — awaiting user review before implementation plan
+- **Status**: Implemented — see §12 for deviations
 
 ## 1. Purpose & Scope
 
@@ -250,3 +250,12 @@ This keeps session startup fast and concentrates network I/O at the user-trigger
 ## 11. Open Questions (for user review)
 
 None at time of writing — all Q1–Q5 decisions are captured above. Implementation plan (task decomposition) follows after spec approval.
+
+## 12. Implementation deviations (added 2026-07-07)
+
+The implementation diverges from the spec in the following ways:
+
+- **§3.1 source URLs**: URLs relocated from `docs.claude.com` to `code.claude.com` after the docs reorganization. `sources.yml` in the repo root is the source of truth; the YAML block in §3.1 is historical.
+- **§3.2 consecutive-failure detection**: The rule requiring two consecutive failures to trigger a suggestion to update `sources.yml` is not implemented — the skill keeps no cross-run fetch-failure state.
+- **§4.4 `--show-redact-diff` flag**: Never implemented. Users can verify redaction manually by running `bash scripts/redact.sh json <file>` and diffing against the original.
+- **§7.2 nudge hook location**: The nudge hook script lives inside the skill repo at `scripts/nudge.sh` (registered per README install step 2), not at `~/.claude/hooks/bp-review-nudge.sh` as specified.
