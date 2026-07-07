@@ -16,11 +16,17 @@ STAMP="${CLAUDE_HOME:-$HOME/.claude}/bp-review/last_check.txt"
 [ -f "$STAMP" ] || exit 0
 
 now=$(date +%s)
-if stat -f %m "$STAMP" >/dev/null 2>&1; then
+# Probe GNU stat first with -c %Y (prints modification time in seconds);
+# on macOS/BSD, -c is rejected, so we fall back to BSD stat -f %m.
+# On Linux, -f is a filesystem mode where %m is not a valid directive and
+# may exit 0 while printing garbage, so we must probe GNU first.
+if ! mtime=$(stat -c %Y "$STAMP" 2>/dev/null); then
   mtime=$(stat -f %m "$STAMP")
-else
-  mtime=$(stat -c %Y "$STAMP")
 fi
+# Validate mtime is a number; if unparseable, stay silent rather than crash.
+case "$mtime" in
+  ''|*[!0-9]*) exit 0 ;;
+esac
 
 age_days=$(( (now - mtime) / 86400 ))
 

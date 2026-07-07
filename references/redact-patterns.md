@@ -36,14 +36,19 @@ would produce excessive false positives:
 
 ## Redaction Modes
 
-- **json**: Walks the JSON tree via `jq`. For every string value whose key
-  matches the pattern, the value is replaced with `"[REDACTED]"`. Non-string
-  values and non-matching keys are preserved. This is the primary and
-  preferred mode.
+- **json**: Walks the JSON tree via `jq`. For every key whose name matches
+  the pattern, the entire value is replaced with `"[REDACTED]"` — regardless
+  of whether the value is a string, object, or array. This means a secret-named
+  key holding a nested object or an array (e.g., `"credentials": {"pass": "..."}`,
+  `"tokens": ["..."]`, `"apiKeys": {"prod": "..."}`) has its whole subtree
+  collapsed to the marker, not just string leaves. Non-matching keys keep
+  recursing into their values as before. This is the primary and preferred
+  mode.
 
-- **text**: Regex-based fallback using `sed` for non-JSON files. Only
-  matches inline `"key": "value"` pairs. Less robust; prefer `json` mode
-  whenever possible.
+- **text**: Regex-based fallback using `sed` for non-JSON files. Matches
+  inline `"key": "value"` pairs, including the `iv` word-boundary pattern
+  (`IV`, `iv`, `enc_iv`, `BARK_ENCRYPT_IV`) without matching `derivative`.
+  Less robust; prefer `json` mode whenever possible.
 
 ## Known Gaps
 

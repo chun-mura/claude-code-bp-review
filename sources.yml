@@ -35,7 +35,7 @@ official:
     min_length: 500
   - url: https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md
     label: Claude Code CHANGELOG (GitHub)
-    expect: ["version", "release"]
+    expect: ["Changelog", "Fixed", "Added"]
     min_length: 300
 
 user:

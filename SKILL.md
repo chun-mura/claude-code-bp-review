@@ -48,10 +48,11 @@ Show the table to the user. For each skill that is behind upstream, offer to run
 Run:
 
 ```
-bash ~/.claude/skills/bp-review/scripts/collect-local.sh > /tmp/bp-review-local.txt
+SNAP=$(mktemp)
+bash ~/.claude/skills/bp-review/scripts/collect-local.sh > "$SNAP"
 ```
 
-Read `/tmp/bp-review-local.txt`. If the script exits with code 3 (CLAUDE.md contained secret-shaped content), stop and tell the user — this requires manual cleanup before the skill can safely proceed.
+Read `$SNAP` (the snapshot's temp path from this step). If the script exits with code 3 (CLAUDE.md contained secret-shaped content), stop and tell the user — this requires manual cleanup before the skill can safely proceed.
 
 **Redaction invariant**: every value in `settings.json` that could hold a credential MUST appear as `[REDACTED]` in the collected snapshot. Do not read `~/.claude/settings.json` directly at any point. Do not echo the full collect-local.sh output into the chat; summarize it or reference sections.
 
@@ -59,9 +60,10 @@ Read `/tmp/bp-review-local.txt`. If the script exits with code 3 (CLAUDE.md cont
 
 Parse `~/.claude/skills/bp-review/sources.yml` (grep-based parsing is sufficient — no YAML library required). For each entry in `official` and `user`:
 
-1. Call WebFetch with the `url`.
-2. Check the returned content against `expect` and `min_length`:
-   - If the content has fewer than half of the `expect` substrings → mark `STALE_FETCH (landmarks missing)`.
+1. Call WebFetch with the `url`, using a prompt that asks for the page's main content as literally as possible — NOT a summary. For example: "Return the main textual content of this page as literally as possible, preserving headings, setting names, and exact keywords." A paraphrased or summarized response makes literal landmark substrings vanish even when the page is fine, so avoid prompts that invite summarization.
+2. Check the returned content against `expect` and `min_length`. Landmark matching is a case-insensitive substring match (e.g. `expect: ["Fixed"]` matches "fixed" or "FIXED" in the fetched text).
+   - If fewer than half of the `expect` substrings are found, do not mark `STALE_FETCH` yet — retry the WebFetch once with a prompt that explicitly asks it to check each missing keyword verbatim, e.g. "Does the literal text '<keyword>' appear anywhere on this page? Quote the surrounding line for each keyword in this list: <expect keywords>." Re-run the case-insensitive substring check against this retry response.
+   - If, after the retry, still fewer than half of the `expect` substrings are present → mark `STALE_FETCH (landmarks missing)`.
    - If the content is shorter than `min_length` characters → mark `STALE_FETCH (too short)`.
    - If WebFetch errors out or redirects → mark `FETCH_ERROR`.
 3. Build a Source Health map:
@@ -142,6 +144,12 @@ date -u +%Y-%m-%dT%H:%M:%SZ > ~/.claude/bp-review/last_check.txt
 ```
 
 The SessionStart nudge hook reads this file.
+
+Once the report has been written (Step 5), delete the local snapshot from Step 2:
+
+```
+rm -f "$SNAP"
+```
 
 ### Step 7 — Summarize to the user
 
