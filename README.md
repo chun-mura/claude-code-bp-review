@@ -1,23 +1,23 @@
 # bp-review
 
-A Claude Code skill that reviews your global `~/.claude/` configuration against the latest official best-practice documentation and user-curated sources, producing a report + draft patches without touching the originals.
+グローバルな `~/.claude/` 設定を、最新の公式ベストプラクティス文書とユーザーが選んだソースと照合してレビューし、レポートとパッチ案を生成する Claude Code スキルです。元の設定ファイルは変更しません。
 
-See `SKILL.md` for the Claude-facing invocation flow and `docs/design.md` for the rationale.
+Claude 向けの呼び出しフローは `SKILL.md`、設計の背景は `docs/design.md` を参照してください。
 
-## Relationship to other tooling
+## 他ツールとの関係
 
-- [`claude-health`](https://github.com/tw93/claude-health) (`/health`) — internal six-layer audit by tw93. Run first.
-- `bp-review` (`/bp-review`) — external best-practice drift check. Run second.
+- [`claude-health`](https://github.com/tw93/claude-health) (`/health`) — tw93 による内部の6層監査。先に実行する。
+- `bp-review` (`/bp-review`) — 外部ベストプラクティスとの乖離チェック。次に実行する。
 
-## Install
+## インストール
 
-1. Clone into your skills directory:
+1. スキルディレクトリにクローンする:
 
    ```sh
    git clone https://github.com/chun-mura/claude-code-bp-review ~/.claude/skills/bp-review
    ```
 
-2. Register the nudge hook in `~/.claude/settings.json` under `.hooks.SessionStart[]`:
+2. `~/.claude/settings.json` の `.hooks.SessionStart[]` に nudge フックを登録する:
 
    ```json
    {
@@ -34,33 +34,33 @@ See `SKILL.md` for the Claude-facing invocation flow and `docs/design.md` for th
    }
    ```
 
-3. Verify by running the redactor tests:
+3. redactor のテストを実行して動作を確認する:
 
    ```sh
    bash ~/.claude/skills/bp-review/scripts/test/test-redact.sh
    ```
 
-4. From Claude Code, run `/bp-review` to execute the first audit. The runtime directory `~/.claude/bp-review/` will be populated with `reports/`, `proposed/`, and `last_check.txt`.
+4. Claude Code から `/bp-review` を実行して初回監査を行う。ランタイムディレクトリ `~/.claude/bp-review/` に `reports/`、`proposed/`、`last_check.txt` が作成される。
 
-## Operational cadence
+## 運用サイクル
 
-Suggested review rhythm:
+推奨するレビュー頻度:
 
-1. **Session-start nudge** — the `SessionStart` hook fires on every new Claude Code session. `scripts/nudge.sh` prints a one-line reminder if the last run is older than `BP_REVIEW_NUDGE_DAYS` (default: 7). No reminder is printed on fresh installs — the timestamp file is only written after the first `/bp-review` run.
-2. **After each run of `/health`** — run `/bp-review` to cover the external frontier that `/health` cannot see.
-3. **Ad hoc** — also run when:
-   - A new Claude Code release lands (watch the release-notes source health for `STALE_FETCH` as an early signal of upstream changes).
-   - Setting up a new machine.
-   - Adopting a new skill or plugin.
+1. **セッション開始時の nudge** — `SessionStart` フックは Claude Code の新規セッションごとに発火する。`scripts/nudge.sh` は、前回実行から `BP_REVIEW_NUDGE_DAYS`（デフォルト: 7日）以上経過している場合に1行のリマインダーを表示する。初回インストール時はリマインダーは出ない。タイムスタンプファイルは最初の `/bp-review` 実行後にのみ書き込まれる。
+2. **`/health` 実行のたび** — `/health` がカバーできない外部の最新動向を確認するため `/bp-review` を実行する。
+3. **随時** — 次のタイミングでも実行する:
+   - 新しい Claude Code リリースが出たとき（上流の変更の早期シグナルとして、リリースノートソースの `STALE_FETCH` を確認する）。
+   - 新しいマシンをセットアップするとき。
+   - 新しいスキルやプラグインを導入するとき。
 
-## Customization
+## カスタマイズ
 
-Add trusted sources to the `user:` block in `sources.yml`. Keep in mind that user-tier sources only contribute to informational findings, never to draft patches.
+`sources.yml` の `user:` ブロックに信頼できるソースを追加できる。`user` ティアのソースは情報提供用の所見にのみ寄与し、パッチ案には反映されない点に注意する。
 
-## Testing the redactor
+## redactor のテスト
 
 ```
 bash scripts/test/test-redact.sh
 ```
 
-All tests must pass before committing any change to `scripts/redact.sh` or the patterns in `references/redact-patterns.md`.
+`scripts/redact.sh` や `references/redact-patterns.md` のパターンを変更する場合は、コミット前にすべてのテストが通ることを確認する。
